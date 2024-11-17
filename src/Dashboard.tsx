@@ -3,11 +3,13 @@ import Header from "./Header";
 import MealLog from "./MealLog";
 import ExerciseLog from "./ExerciseLog";
 
-const Dashboard = () => {
-  const [selectedForm, setSelectedForm] = useState<"meal" | "exercise">("meal");
+type MealsByDate = Record<string, any>;
+type ExercisesByDate = Record<string, any>;
 
-  const [mealsByDate, setMealsByDate] = useState<Record<string, MealEntry[]>>({});
-  const [exercisesByDate, setExercisesByDate] = useState<Record<string, ExerciseEntry[]>>({});
+const Dashboard: React.FC = () => {
+  const [selectedForm, setSelectedForm] = useState<"meal" | "exercise">("meal");
+  const [mealsByDate, setMealsByDate] = useState<MealsByDate>({});
+  const [exercisesByDate, setExercisesByDate] = useState<ExercisesByDate>({});
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-100">
@@ -28,4 +30,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-

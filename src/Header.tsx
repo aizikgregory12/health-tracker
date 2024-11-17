@@ -1,10 +1,9 @@
-const Header = ({
-  selectedForm,
-  setSelectedForm,
-}: {
+type HeaderProps = {
   selectedForm: "meal" | "exercise";
   setSelectedForm: (form: "meal" | "exercise") => void;
-}) => {
+};
+
+const Header: React.FC<HeaderProps> = ({ selectedForm, setSelectedForm }) => {
   return (
     <div className="w-full bg-white shadow-md p-4 flex justify-center space-x-4">
       <button
