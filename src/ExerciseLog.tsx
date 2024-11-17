@@ -1,5 +1,4 @@
 import React, { useState, useCallback } from "react";
-import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { v4 as uuidv4 } from "uuid";
 import { Line } from "react-chartjs-2";
@@ -13,14 +12,6 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import {
-  startOfWeek,
-  endOfWeek,
-  startOfMonth,
-  endOfMonth,
-  isWithinInterval,
-  parseISO,
-} from "date-fns";
 
 ChartJS.register(
   CategoryScale,
@@ -32,8 +23,39 @@ ChartJS.register(
   Legend
 );
 
-const ExerciseLog = ({ exercisesByDate, setExercisesByDate }) => {
-  const [exercise, setExercise] = useState({
+// Type Definitions
+type Exercise = {
+  id?: string;
+  name: string;
+  duration: string;
+  intensity: string;
+  caloriesBurned: string;
+  date: string;
+  time: string;
+};
+
+type Goal = {
+  weeklyCalories: number;
+  weeklyDuration: number;
+};
+
+type Progress = {
+  totalCalories: number;
+  totalDuration: number;
+};
+
+type ExercisesByDate = Record<string, Exercise[]>;
+
+type ExerciseLogProps = {
+  exercisesByDate: ExercisesByDate;
+  setExercisesByDate: React.Dispatch<React.SetStateAction<ExercisesByDate>>;
+};
+
+const ExerciseLog: React.FC<ExerciseLogProps> = ({
+  exercisesByDate,
+  setExercisesByDate,
+}) => {
+  const [exercise, setExercise] = useState<Exercise>({
     name: "",
     duration: "",
     intensity: "",
@@ -41,14 +63,18 @@ const ExerciseLog = ({ exercisesByDate, setExercisesByDate }) => {
     date: new Date().toISOString().slice(0, 10),
     time: "08:00",
   });
-  const [error, setError] = useState("");
-  const [goal, setGoal] = useState({ weeklyCalories: 0, weeklyDuration: 0 });
-  const [progress, setProgress] = useState({
+
+  const [error, setError] = useState<string>("");
+  const [goal, setGoal] = useState<Goal>({
+    weeklyCalories: 0,
+    weeklyDuration: 0,
+  });
+  const [progress, setProgress] = useState<Progress>({
     totalCalories: 0,
     totalDuration: 0,
   });
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setExercise((prevExercise) => ({ ...prevExercise, [name]: value }));
   };
@@ -68,7 +94,11 @@ const ExerciseLog = ({ exercisesByDate, setExercisesByDate }) => {
     setError("");
 
     const exerciseDate = new Date(exercise.date).toISOString().slice(0, 10);
-    const newExerciseEntry = { ...exercise, date: exerciseDate, id: uuidv4() };
+    const newExerciseEntry: Exercise = {
+      ...exercise,
+      date: exerciseDate,
+      id: uuidv4(),
+    };
 
     setExercisesByDate((prevExercisesByDate) => {
       const updatedExercises = { ...prevExercisesByDate };
@@ -92,9 +122,9 @@ const ExerciseLog = ({ exercisesByDate, setExercisesByDate }) => {
     });
   }, [exercise, setExercisesByDate]);
 
-  const handleGoalChange = (e) => {
+  const handleGoalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setGoal((prevGoal) => ({ ...prevGoal, [name]: value }));
+    setGoal((prevGoal) => ({ ...prevGoal, [name]: parseInt(value, 10) || 0 }));
   };
 
   const calculateProgress = () => {

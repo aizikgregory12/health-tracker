@@ -1,6 +1,10 @@
-import React from "react";
-
-const Header = ({ selectedForm, setSelectedForm }) => {
+const Header = ({
+  selectedForm,
+  setSelectedForm,
+}: {
+  selectedForm: "meal" | "exercise";
+  setSelectedForm: (form: "meal" | "exercise") => void;
+}) => {
   return (
     <div className="w-full bg-white shadow-md p-4 flex justify-center space-x-4">
       <button

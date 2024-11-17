@@ -4,10 +4,10 @@ import MealLog from "./MealLog";
 import ExerciseLog from "./ExerciseLog";
 
 const Dashboard = () => {
-  const [selectedForm, setSelectedForm] = useState("meal");
+  const [selectedForm, setSelectedForm] = useState<"meal" | "exercise">("meal");
 
-  const [mealsByDate, setMealsByDate] = useState({});
-  const [exercisesByDate, setExercisesByDate] = useState({});
+  const [mealsByDate, setMealsByDate] = useState<Record<string, MealEntry[]>>({});
+  const [exercisesByDate, setExercisesByDate] = useState<Record<string, ExerciseEntry[]>>({});
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-100">
@@ -28,3 +28,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
