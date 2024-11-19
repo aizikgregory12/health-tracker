@@ -3,13 +3,11 @@ import Header from "./Header";
 import MealLog from "./MealLog";
 import ExerciseLog from "./ExerciseLog";
 
-type MealsByDate = Record<string, any>;
-type ExercisesByDate = Record<string, any>;
-
-const Dashboard: React.FC = () => {
-  const [selectedForm, setSelectedForm] = useState<"meal" | "exercise">("meal");
-  const [mealsByDate, setMealsByDate] = useState<MealsByDate>({});
-  const [exercisesByDate, setExercisesByDate] = useState<ExercisesByDate>({});
+const Dashboard = () => {
+  // Define state without TypeScript types
+  const [selectedForm, setSelectedForm] = useState("meal");
+  const [mealsByDate, setMealsByDate] = useState({});
+  const [exercisesByDate, setExercisesByDate] = useState({});
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-100">

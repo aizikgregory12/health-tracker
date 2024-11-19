@@ -1,5 +1,6 @@
-import React, { useState, useCallback, ChangeEvent } from "react";
+import React, { useState, useCallback } from "react";
 import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
 import { v4 as uuidv4 } from "uuid";
 import {
   startOfWeek,
@@ -10,25 +11,8 @@ import {
   parseISO,
 } from "date-fns";
 
-interface Meal {
-  name: string;
-  portionSize: string;
-  calories: string;
-  protein: string;
-  carbs: string;
-  fats: string;
-  date: string;
-  time: string;
-  id?: string;
-}
-
-interface MealLogProps {
-  mealsByDate: Record<string, Meal[]>;
-  setMealsByDate: React.Dispatch<React.SetStateAction<Record<string, Meal[]>>>;
-}
-
-const MealLog: React.FC<MealLogProps> = ({ mealsByDate, setMealsByDate }) => {
-  const [meal, setMeal] = useState<Meal>({
+const MealLog = ({ mealsByDate, setMealsByDate }) => {
+  const [meal, setMeal] = useState({
     name: "",
     portionSize: "",
     calories: "",
@@ -38,13 +22,12 @@ const MealLog: React.FC<MealLogProps> = ({ mealsByDate, setMealsByDate }) => {
     date: new Date().toISOString().slice(0, 10),
     time: "12:00",
   });
+  const [error, setError] = useState("");
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [summaryType, setSummaryType] = useState("daily");
+  const [viewDate, setViewDate] = useState(new Date());
 
-  const [error, setError] = useState<string>("");
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [summaryType, setSummaryType] = useState<string>("daily");
-  const [viewDate, setViewDate] = useState<Date>(new Date());
-
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
     setMeal((prevMeal) => ({ ...prevMeal, [name]: value }));
   };
@@ -66,7 +49,7 @@ const MealLog: React.FC<MealLogProps> = ({ mealsByDate, setMealsByDate }) => {
     setError("");
 
     const mealDate = new Date(meal.date).toISOString().slice(0, 10);
-    const newMealEntry: Meal = { ...meal, date: mealDate, id: uuidv4() };
+    const newMealEntry = { ...meal, date: mealDate, id: uuidv4() };
 
     setMealsByDate((prevMealsByDate) => {
       const updatedMeals = { ...prevMealsByDate };
@@ -103,7 +86,8 @@ const MealLog: React.FC<MealLogProps> = ({ mealsByDate, setMealsByDate }) => {
     const selectedISODate = selectedDate.toISOString().slice(0, 10);
 
     if (summaryType === "daily") {
-      (mealsByDate[selectedISODate] || []).forEach((meal) => {
+      const dailyMeals = mealsByDate[selectedISODate] || [];
+      dailyMeals.forEach((meal) => {
         totalCalories += parseInt(meal.calories, 10);
         totalProtein += parseInt(meal.protein, 10);
         totalCarbs += parseInt(meal.carbs, 10);
@@ -144,6 +128,7 @@ const MealLog: React.FC<MealLogProps> = ({ mealsByDate, setMealsByDate }) => {
             Meal Logging
           </h2>
           {error && <p className="text-red-600 text-center mb-4">{error}</p>}
+
           <input
             type="text"
             name="name"
@@ -227,7 +212,7 @@ const MealLog: React.FC<MealLogProps> = ({ mealsByDate, setMealsByDate }) => {
             Select Date
           </h3>
           <Calendar
-            onChange={(value) => setSelectedDate(value as Date)}
+            onChange={setSelectedDate}
             value={selectedDate}
             tileClassName={({ date }) => {
               const dateKey = date.toISOString().slice(0, 10);
@@ -266,13 +251,11 @@ const MealLog: React.FC<MealLogProps> = ({ mealsByDate, setMealsByDate }) => {
         <h3 className="text-lg font-semibold text-blue-500 mb-4 text-center">
           Meals for {viewDate.toLocaleDateString()}
         </h3>
-        <div className="flex justify-center">
-          <Calendar
-            onChange={(value) => setViewDate(value as Date)}
-            value={viewDate}
-            className="mb-6 w-full"
-          />
-        </div>
+        <Calendar
+          onChange={setViewDate}
+          value={viewDate}
+          className="mb-6 w-full"
+        />
         {displayMealsForSelectedDate().length === 0 ? (
           <p className="text-gray-600 text-center">
             No meals logged for this day.
