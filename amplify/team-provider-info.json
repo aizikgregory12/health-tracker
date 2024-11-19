@@ -1,0 +1,20 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-healthtracker-dev-c2929-authRole",
+      "UnauthRoleArn": "arn:aws:iam::746669198999:role/amplify-healthtracker-dev-c2929-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::746669198999:role/amplify-healthtracker-dev-c2929-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-healthtracker-dev-c2929-deployment",
+      "UnauthRoleName": "amplify-healthtracker-dev-c2929-unauthRole",
+      "StackName": "amplify-healthtracker-dev-c2929",
+      "StackId": "arn:aws:cloudformation:us-east-1:746669198999:stack/amplify-healthtracker-dev-c2929/d6b51330-a35a-11ef-a8ab-0affd8c950cf",
+      "AmplifyAppId": "d3t1yvy5n05e8s"
+    },
+    "categories": {
+      "auth": {
+        "healthtrackerc6fff06b": {}
+      }
+    }
+  }
+}
