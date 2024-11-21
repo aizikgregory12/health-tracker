@@ -110,10 +110,7 @@ const MealLog = ({ user }) => {
           },
         },
       });
-      console.log(meal.date);
-      console.log(new Date(meal.date));
       setViewDate(new Date(`${meal.date}T00:00:00`));
-      console.log(result);
     } catch (error) {
       console.error("Error executing GraphQL query:", error);
     }
