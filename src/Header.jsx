@@ -49,7 +49,7 @@ const Header = ({ selectedForm, setSelectedForm, signOut }) => {
         <button
           onClick={() => setSelectedForm("meal")}
           aria-pressed={selectedForm === "meal"}
-          className={`block w-full lg:w-auto px-6 py-2 rounded-lg font-semibold transition duration-200 whitespace-nowrap ${
+          className={`w-full lg:w-auto px-6 py-2 rounded-lg font-semibold transition duration-200 whitespace-nowrap flex justify-center ${
             selectedForm === "meal"
               ? "bg-blue-600 text-white"
               : "bg-gray-200 text-gray-700 hover:bg-gray-300"
@@ -60,7 +60,7 @@ const Header = ({ selectedForm, setSelectedForm, signOut }) => {
         <button
           onClick={() => setSelectedForm("exercise")}
           aria-pressed={selectedForm === "exercise"}
-          className={`block w-full lg:w-auto px-6 py-2 rounded-lg font-semibold transition duration-200 whitespace-nowrap ${
+          className={`w-full lg:w-auto px-6 py-2 rounded-lg font-semibold transition duration-200 whitespace-nowrap flex justify-center ${
             selectedForm === "exercise"
               ? "bg-blue-600 text-white"
               : "bg-gray-200 text-gray-700 hover:bg-gray-300"
@@ -70,7 +70,7 @@ const Header = ({ selectedForm, setSelectedForm, signOut }) => {
         </button>
         <button
           onClick={signOut}
-          className="block w-full lg:hidden bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition whitespace-nowrap"
+          className="w-full lg:hidden bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition whitespace-nowrap flex justify-center"
         >
           Log Out
         </button>
