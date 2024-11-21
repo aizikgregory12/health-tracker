@@ -110,6 +110,9 @@ const MealLog = ({ user }) => {
           },
         },
       });
+      console.log(meal.date);
+      console.log(new Date(meal.date));
+      setViewDate(new Date(`${meal.date}T00:00:00`));
       console.log(result);
     } catch (error) {
       console.error("Error executing GraphQL query:", error);
@@ -126,7 +129,6 @@ const MealLog = ({ user }) => {
 
     try {
       if (summaryType === "daily") {
-        // Fetch meal logs for the selected date
         const dailyMeals = await client.graphql({
           query: listMealLogs,
           variables: {
@@ -143,7 +145,6 @@ const MealLog = ({ user }) => {
           totalFats += parseInt(meal.fats, 10);
         });
       } else {
-        // Calculate date range
         const dateRange =
           summaryType === "weekly"
             ? { start: startOfWeek(selectedDate), end: endOfWeek(selectedDate) }
@@ -152,7 +153,6 @@ const MealLog = ({ user }) => {
                 end: endOfMonth(selectedDate),
               };
 
-        // Fetch meal logs for the date range
         const mealLogs = await client.graphql({
           query: listMealLogs,
           variables: {
@@ -184,11 +184,11 @@ const MealLog = ({ user }) => {
   useEffect(() => {
     const fetchSummary = async () => {
       const summaryData = await calculateSummary();
-      setSummary(summaryData); // Assuming you have a `setSummary` state for the summary data
+      setSummary(summaryData);
     };
 
     fetchSummary();
-  }, [selectedDate, summaryType]); // Recalculate when date or summary type changes
+  }, [selectedDate, summaryType]);
 
   console.log(mealsByDate);
   return (
