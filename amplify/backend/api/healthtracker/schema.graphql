@@ -1,0 +1,22 @@
+type MealLog @model @auth(rules: [{ allow: owner }]) {
+  id: ID!
+  userId: String! # Cognito User ID
+  name: String!
+  portionSize: String!
+  calories: Int!
+  protein: Int!
+  carbs: Int!
+  fats: Int!
+  date: AWSDate!
+  time: AWSTime!
+}
+
+type ExerciseLog @model @auth(rules: [{ allow: owner }]) {
+  id: ID!
+  userId: String! # Cognito User ID
+  exerciseName: String!
+  duration: Int! # Duration in minutes
+  intensity: String
+  caloriesBurned: Int!
+  date: AWSDate!
+}

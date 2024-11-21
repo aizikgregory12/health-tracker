@@ -1,4 +1,10 @@
 export type AmplifyDependentResourcesAttributes = {
+  "api": {
+    "healthtracker": {
+      "GraphQLAPIEndpointOutput": "string",
+      "GraphQLAPIIdOutput": "string"
+    }
+  },
   "auth": {
     "healthtrackerc6fff06b": {
       "AppClientID": "string",

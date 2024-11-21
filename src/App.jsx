@@ -6,7 +6,6 @@ import "@aws-amplify/ui-react/styles.css";
 import Dashboard from "./Dashboard";
 
 Amplify.configure(awsExports);
-
 const App = () => {
   return (
     <Authenticator className="flex w-screen h-screen items-center justify-center">

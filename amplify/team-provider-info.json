@@ -14,6 +14,9 @@
     "categories": {
       "auth": {
         "healthtrackerc6fff06b": {}
+      },
+      "api": {
+        "healthtracker": {}
       }
     }
   }

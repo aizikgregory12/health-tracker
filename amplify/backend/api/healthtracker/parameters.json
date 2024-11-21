@@ -1,0 +1,11 @@
+{
+  "AppSyncApiName": "healthtracker",
+  "DynamoDBBillingMode": "PAY_PER_REQUEST",
+  "DynamoDBEnableServerSideEncryption": false,
+  "AuthCognitoUserPoolId": {
+    "Fn::GetAtt": [
+      "authhealthtrackerc6fff06b",
+      "Outputs.UserPoolId"
+    ]
+  }
+}

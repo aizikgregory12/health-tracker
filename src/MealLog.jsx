@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { v4 as uuidv4 } from "uuid";
@@ -10,8 +10,12 @@ import {
   isWithinInterval,
   parseISO,
 } from "date-fns";
+import { generateClient } from "aws-amplify/api";
+import { createMealLog } from "./graphql/mutations";
 
-const MealLog = ({ mealsByDate, setMealsByDate }) => {
+const client = generateClient();
+
+const MealLog = ({ mealsByDate, user, fetchListMealLogs }) => {
   const [meal, setMeal] = useState({
     name: "",
     portionSize: "",
@@ -32,7 +36,7 @@ const MealLog = ({ mealsByDate, setMealsByDate }) => {
     setMeal((prevMeal) => ({ ...prevMeal, [name]: value }));
   };
 
-  const addMeal = useCallback(() => {
+  const addMeal = useCallback(async () => {
     if (
       !meal.name ||
       !meal.portionSize ||
@@ -51,15 +55,6 @@ const MealLog = ({ mealsByDate, setMealsByDate }) => {
     const mealDate = new Date(meal.date).toISOString().slice(0, 10);
     const newMealEntry = { ...meal, date: mealDate, id: uuidv4() };
 
-    setMealsByDate((prevMealsByDate) => {
-      const updatedMeals = { ...prevMealsByDate };
-      if (!updatedMeals[mealDate]) {
-        updatedMeals[mealDate] = [];
-      }
-      updatedMeals[mealDate] = [...updatedMeals[mealDate], newMealEntry];
-      return updatedMeals;
-    });
-
     setMeal({
       name: "",
       portionSize: "",
@@ -70,11 +65,39 @@ const MealLog = ({ mealsByDate, setMealsByDate }) => {
       date: new Date().toISOString().slice(0, 10),
       time: "12:00",
     });
-  }, [meal, setMealsByDate]);
 
-  const displayMealsForSelectedDate = () => {
+    try {
+      const result = await client.graphql({
+        query: createMealLog,
+        variables: {
+          input: {
+            userId: user.username,
+            name: meal.name,
+            portionSize: meal.portionSize,
+            calories: parseInt(meal.calories, 10),
+            protein: parseInt(meal.protein, 10),
+            carbs: parseInt(meal.carbs, 10),
+            fats: parseInt(meal.fats, 10),
+            date: meal.date,
+            time: meal.time,
+          },
+        },
+      });
+      console.log(result);
+    } catch (error) {
+      console.error("Error executing GraphQL query:", error);
+    }
+  }, [meal]);
+
+  useEffect(() => {
     const dateKey = viewDate.toISOString().slice(0, 10);
-    return mealsByDate[dateKey] || [];
+    fetchListMealLogs(dateKey);
+  }, [viewDate]);
+
+  console.log(mealsByDate);
+  const displayMealsForSelectedDate = () => {
+    const dateKey = selectedDate.toISOString().slice(0, 10);
+    return mealsByDate;
   };
 
   const calculateSummary = () => {
@@ -252,11 +275,11 @@ const MealLog = ({ mealsByDate, setMealsByDate }) => {
           Meals for {viewDate.toLocaleDateString()}
         </h3>
         <Calendar
-          onChange={setViewDate}
+          onChange={(newDate) => setViewDate(newDate)}
           value={viewDate}
           className="mb-6 w-full"
         />
-        {displayMealsForSelectedDate().length === 0 ? (
+        {displayMealsForSelectedDate() === null ? (
           <p className="text-gray-600 text-center">
             No meals logged for this day.
           </p>
