@@ -12,10 +12,11 @@ import {
 } from "date-fns";
 import { generateClient } from "aws-amplify/api";
 import { createMealLog } from "./graphql/mutations";
+import { listMealLogs } from "./graphql/queries";
 
 const client = generateClient();
 
-const MealLog = ({ mealsByDate, user, fetchListMealLogs }) => {
+const MealLog = ({ user }) => {
   const [meal, setMeal] = useState({
     name: "",
     portionSize: "",
@@ -30,6 +31,35 @@ const MealLog = ({ mealsByDate, user, fetchListMealLogs }) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [summaryType, setSummaryType] = useState("daily");
   const [viewDate, setViewDate] = useState(new Date());
+  const [mealsByDate, setMealsByDate] = useState([]);
+  const [summary, setSummary] = useState({});
+
+  useEffect(() => {
+    fetchListMealLogs(viewDate.toISOString().slice(0, 10));
+  }, [viewDate]);
+
+  const fetchListMealLogs = useCallback(
+    async (date) => {
+      try {
+        const mealLogs = await client.graphql({
+          query: listMealLogs,
+          variables: {
+            filter: {
+              date: {
+                eq: date,
+              },
+            },
+          },
+        });
+        const items = mealLogs.data.listMealLogs.items;
+
+        setMealsByDate((prev) => [...items]);
+      } catch (error) {
+        console.error("Error fetching meal logs:", error);
+      }
+    },
+    [setMealsByDate]
+  );
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -51,9 +81,6 @@ const MealLog = ({ mealsByDate, user, fetchListMealLogs }) => {
       return;
     }
     setError("");
-
-    const mealDate = new Date(meal.date).toISOString().slice(0, 10);
-    const newMealEntry = { ...meal, date: mealDate, id: uuidv4() };
 
     setMeal({
       name: "",
@@ -89,18 +116,7 @@ const MealLog = ({ mealsByDate, user, fetchListMealLogs }) => {
     }
   }, [meal]);
 
-  useEffect(() => {
-    const dateKey = viewDate.toISOString().slice(0, 10);
-    fetchListMealLogs(dateKey);
-  }, [viewDate]);
-
-  console.log(mealsByDate);
-  const displayMealsForSelectedDate = () => {
-    const dateKey = selectedDate.toISOString().slice(0, 10);
-    return mealsByDate;
-  };
-
-  const calculateSummary = () => {
+  const calculateSummary = async () => {
     let totalCalories = 0;
     let totalProtein = 0;
     let totalCarbs = 0;
@@ -108,41 +124,73 @@ const MealLog = ({ mealsByDate, user, fetchListMealLogs }) => {
 
     const selectedISODate = selectedDate.toISOString().slice(0, 10);
 
-    if (summaryType === "daily") {
-      const dailyMeals = mealsByDate[selectedISODate] || [];
-      dailyMeals.forEach((meal) => {
-        totalCalories += parseInt(meal.calories, 10);
-        totalProtein += parseInt(meal.protein, 10);
-        totalCarbs += parseInt(meal.carbs, 10);
-        totalFats += parseInt(meal.fats, 10);
-      });
-    } else {
-      const dateRange =
-        summaryType === "weekly"
-          ? { start: startOfWeek(selectedDate), end: endOfWeek(selectedDate) }
-          : {
-              start: startOfMonth(selectedDate),
-              end: endOfMonth(selectedDate),
-            };
+    try {
+      if (summaryType === "daily") {
+        // Fetch meal logs for the selected date
+        const dailyMeals = await client.graphql({
+          query: listMealLogs,
+          variables: {
+            filter: {
+              date: { eq: selectedISODate },
+            },
+          },
+        });
 
-      for (const date in mealsByDate) {
-        const mealDate = parseISO(date);
-        if (isWithinInterval(mealDate, dateRange)) {
-          mealsByDate[date].forEach((meal) => {
-            totalCalories += parseInt(meal.calories, 10);
-            totalProtein += parseInt(meal.protein, 10);
-            totalCarbs += parseInt(meal.carbs, 10);
-            totalFats += parseInt(meal.fats, 10);
-          });
-        }
+        dailyMeals.data.listMealLogs.items.forEach((meal) => {
+          totalCalories += parseInt(meal.calories, 10);
+          totalProtein += parseInt(meal.protein, 10);
+          totalCarbs += parseInt(meal.carbs, 10);
+          totalFats += parseInt(meal.fats, 10);
+        });
+      } else {
+        // Calculate date range
+        const dateRange =
+          summaryType === "weekly"
+            ? { start: startOfWeek(selectedDate), end: endOfWeek(selectedDate) }
+            : {
+                start: startOfMonth(selectedDate),
+                end: endOfMonth(selectedDate),
+              };
+
+        // Fetch meal logs for the date range
+        const mealLogs = await client.graphql({
+          query: listMealLogs,
+          variables: {
+            filter: {
+              date: {
+                between: [
+                  dateRange.start.toISOString().slice(0, 10),
+                  dateRange.end.toISOString().slice(0, 10),
+                ],
+              },
+            },
+          },
+        });
+
+        mealLogs.data.listMealLogs.items.forEach((meal) => {
+          totalCalories += parseInt(meal.calories, 10);
+          totalProtein += parseInt(meal.protein, 10);
+          totalCarbs += parseInt(meal.carbs, 10);
+          totalFats += parseInt(meal.fats, 10);
+        });
       }
+    } catch (error) {
+      console.error("Error fetching meal logs for summary:", error);
     }
 
     return { totalCalories, totalProtein, totalCarbs, totalFats };
   };
 
-  const summary = calculateSummary();
+  useEffect(() => {
+    const fetchSummary = async () => {
+      const summaryData = await calculateSummary();
+      setSummary(summaryData); // Assuming you have a `setSummary` state for the summary data
+    };
 
+    fetchSummary();
+  }, [selectedDate, summaryType]); // Recalculate when date or summary type changes
+
+  console.log(mealsByDate);
   return (
     <div className="flex flex-col items-center space-y-6 bg-gray-100 min-h-screen p-4">
       <div className="flex flex-col md:flex-row bg-white rounded-lg shadow-xl max-w-4xl p-6 space-y-8 md:space-y-0 md:space-x-6">
@@ -156,7 +204,6 @@ const MealLog = ({ mealsByDate, user, fetchListMealLogs }) => {
             type="text"
             name="name"
             placeholder="Food Item"
-            autoComplete="off"
             value={meal.name}
             onChange={handleInputChange}
             className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
@@ -165,7 +212,6 @@ const MealLog = ({ mealsByDate, user, fetchListMealLogs }) => {
             type="number"
             name="portionSize"
             placeholder="Portion Size"
-            autoComplete="off"
             value={meal.portionSize}
             onChange={handleInputChange}
             className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
@@ -174,7 +220,6 @@ const MealLog = ({ mealsByDate, user, fetchListMealLogs }) => {
             type="number"
             name="calories"
             placeholder="Calories"
-            autoComplete="off"
             value={meal.calories}
             onChange={handleInputChange}
             className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
@@ -183,7 +228,6 @@ const MealLog = ({ mealsByDate, user, fetchListMealLogs }) => {
             type="number"
             name="protein"
             placeholder="Protein (g)"
-            autoComplete="off"
             value={meal.protein}
             onChange={handleInputChange}
             className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
@@ -192,7 +236,6 @@ const MealLog = ({ mealsByDate, user, fetchListMealLogs }) => {
             type="number"
             name="carbs"
             placeholder="Carbs (g)"
-            autoComplete="off"
             value={meal.carbs}
             onChange={handleInputChange}
             className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
@@ -201,7 +244,6 @@ const MealLog = ({ mealsByDate, user, fetchListMealLogs }) => {
             type="number"
             name="fats"
             placeholder="Fats (g)"
-            autoComplete="off"
             value={meal.fats}
             onChange={handleInputChange}
             className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
@@ -209,7 +251,6 @@ const MealLog = ({ mealsByDate, user, fetchListMealLogs }) => {
           <input
             type="date"
             name="date"
-            autoComplete="off"
             value={meal.date}
             onChange={handleInputChange}
             className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
@@ -217,7 +258,6 @@ const MealLog = ({ mealsByDate, user, fetchListMealLogs }) => {
           <input
             type="time"
             name="time"
-            autoComplete="off"
             value={meal.time}
             onChange={handleInputChange}
             className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
@@ -279,13 +319,13 @@ const MealLog = ({ mealsByDate, user, fetchListMealLogs }) => {
           value={viewDate}
           className="mb-6 w-full"
         />
-        {displayMealsForSelectedDate() === null ? (
+        {mealsByDate.length === 0 ? (
           <p className="text-gray-600 text-center">
             No meals logged for this day.
           </p>
         ) : (
           <ul className="space-y-4">
-            {displayMealsForSelectedDate().map((m) => (
+            {mealsByDate.map((m) => (
               <li
                 key={m.id}
                 className="p-4 border border-gray-300 rounded-lg bg-gray-50 shadow-sm"
