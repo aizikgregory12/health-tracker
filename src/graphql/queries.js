@@ -91,3 +91,47 @@ export const listExerciseLogs = /* GraphQL */ `
     }
   }
 `;
+export const getWeeklyGoal = /* GraphQL */ `
+  query GetWeeklyGoal($id: ID!) {
+    getWeeklyGoal(id: $id) {
+      id
+      userId
+      startOfWeek
+      endOfWeek
+      weeklyCaloriesGoal
+      weeklyDurationGoal
+      caloriesBurned
+      duration
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const listWeeklyGoals = /* GraphQL */ `
+  query ListWeeklyGoals(
+    $filter: ModelWeeklyGoalFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listWeeklyGoals(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        userId
+        startOfWeek
+        endOfWeek
+        weeklyCaloriesGoal
+        weeklyDurationGoal
+        caloriesBurned
+        duration
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;

@@ -5,7 +5,6 @@ import ExerciseLog from "./ExerciseLog";
 
 const Dashboard = ({ user, signOut }) => {
   const [selectedForm, setSelectedForm] = useState("meal");
-  const [exercisesByDate, setExercisesByDate] = useState({});
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-100">
@@ -18,12 +17,7 @@ const Dashboard = ({ user, signOut }) => {
 
       <div className="w-full flex-grow flex justify-center items-center p-4">
         {selectedForm === "meal" && <MealLog user={user} />}
-        {selectedForm === "exercise" && (
-          <ExerciseLog
-            exercisesByDate={exercisesByDate}
-            setExercisesByDate={setExercisesByDate}
-          />
-        )}
+        {selectedForm === "exercise" && <ExerciseLog user={user} />}
       </div>
     </div>
   );

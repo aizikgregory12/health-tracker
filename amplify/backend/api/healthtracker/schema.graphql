@@ -20,3 +20,16 @@ type ExerciseLog @model @auth(rules: [{ allow: owner }]) {
   caloriesBurned: Int!
   date: AWSDate!
 }
+
+type WeeklyGoal @model @auth(rules: [{ allow: owner }]) {
+  id: ID!
+  userId: ID!
+  startOfWeek: AWSDate!
+  endOfWeek: AWSDate!
+  weeklyCaloriesGoal: Int!
+  weeklyDurationGoal: Int!
+  caloriesBurned: Int!
+  duration: Int!
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}

@@ -130,3 +130,66 @@ export const onDeleteExerciseLog = /* GraphQL */ `
     }
   }
 `;
+export const onCreateWeeklyGoal = /* GraphQL */ `
+  subscription OnCreateWeeklyGoal(
+    $filter: ModelSubscriptionWeeklyGoalFilterInput
+    $owner: String
+  ) {
+    onCreateWeeklyGoal(filter: $filter, owner: $owner) {
+      id
+      userId
+      startOfWeek
+      endOfWeek
+      weeklyCaloriesGoal
+      weeklyDurationGoal
+      caloriesBurned
+      duration
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const onUpdateWeeklyGoal = /* GraphQL */ `
+  subscription OnUpdateWeeklyGoal(
+    $filter: ModelSubscriptionWeeklyGoalFilterInput
+    $owner: String
+  ) {
+    onUpdateWeeklyGoal(filter: $filter, owner: $owner) {
+      id
+      userId
+      startOfWeek
+      endOfWeek
+      weeklyCaloriesGoal
+      weeklyDurationGoal
+      caloriesBurned
+      duration
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
+export const onDeleteWeeklyGoal = /* GraphQL */ `
+  subscription OnDeleteWeeklyGoal(
+    $filter: ModelSubscriptionWeeklyGoalFilterInput
+    $owner: String
+  ) {
+    onDeleteWeeklyGoal(filter: $filter, owner: $owner) {
+      id
+      userId
+      startOfWeek
+      endOfWeek
+      weeklyCaloriesGoal
+      weeklyDurationGoal
+      caloriesBurned
+      duration
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+  }
+`;
