@@ -135,3 +135,21 @@ export const listWeeklyGoals = /* GraphQL */ `
     }
   }
 `;
+
+export const listHydrationLogs = /* GraphQL */ `
+  query ListHydrationLogs(
+    $filter: ModelHydrationLogFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listHydrationLogs(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        userId
+        amount
+        createdAt
+      }
+      nextToken
+    }
+  }
+`;

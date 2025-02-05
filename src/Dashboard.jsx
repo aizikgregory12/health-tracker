@@ -2,6 +2,7 @@ import React, { useState, useCallback } from "react";
 import Header from "./Header";
 import MealLog from "./MealLog";
 import ExerciseLog from "./ExerciseLog";
+import HydrationLog from "./HydrationLog";
 
 const Dashboard = ({ user, signOut }) => {
   const [selectedForm, setSelectedForm] = useState("meal");
@@ -18,6 +19,7 @@ const Dashboard = ({ user, signOut }) => {
       <div className="w-full flex-grow flex justify-center items-center p-4">
         {selectedForm === "meal" && <MealLog user={user} />}
         {selectedForm === "exercise" && <ExerciseLog user={user} />}
+        {selectedForm === "hydration" && <HydrationLog user={user} />}
       </div>
     </div>
   );

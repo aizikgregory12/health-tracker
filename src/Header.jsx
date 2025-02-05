@@ -69,6 +69,17 @@ const Header = ({ selectedForm, setSelectedForm, signOut }) => {
           Exercise Log
         </button>
         <button
+          onClick={() => setSelectedForm("hydration")}
+          aria-pressed={selectedForm === "hydration"}
+          className={`w-full lg:w-auto px-6 py-2 rounded-lg font-semibold transition duration-200 whitespace-nowrap flex justify-center ${
+            selectedForm === "hydration"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+          }`}
+        >
+          Hydration
+        </button>
+        <button
           onClick={signOut}
           className="w-full lg:hidden bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition whitespace-nowrap flex justify-center"
         >

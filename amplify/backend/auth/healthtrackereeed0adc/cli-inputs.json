@@ -1,10 +1,10 @@
 {
   "version": "1",
   "cognitoConfig": {
-    "identityPoolName": "healthtrackerc6fff06b_identitypool_c6fff06b",
+    "identityPoolName": "healthtrackereeed0adc_identitypool_eeed0adc",
     "allowUnauthenticatedIdentities": false,
-    "resourceNameTruncated": "healthc6fff06b",
-    "userPoolName": "healthtrackerc6fff06b_userpool_c6fff06b",
+    "resourceNameTruncated": "healtheeed0adc",
+    "userPoolName": "healthtrackereeed0adc_userpool_eeed0adc",
     "autoVerifiedAttributes": [
       "email"
     ],
@@ -31,12 +31,15 @@
     "userpoolClientReadAttributes": [
       "email"
     ],
-    "userpoolClientLambdaRole": "healthc6fff06b_userpoolclient_lambda_role",
+    "userpoolClientLambdaRole": "healtheeed0adc_userpoolclient_lambda_role",
     "userpoolClientSetAttributes": false,
-    "sharedId": "c6fff06b",
-    "resourceName": "healthtrackerc6fff06b",
+    "sharedId": "eeed0adc",
+    "resourceName": "healthtrackereeed0adc",
     "authSelections": "identityPoolAndUserPool",
     "useDefault": "default",
+    "usernameAttributes": [
+      "email"
+    ],
     "userPoolGroupList": [],
     "serviceName": "Cognito",
     "usernameCaseSensitive": false,

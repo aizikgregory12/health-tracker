@@ -193,3 +193,33 @@ export const deleteWeeklyGoal = /* GraphQL */ `
     }
   }
 `;
+
+export const createHydrationLog = /* GraphQL */ `
+  mutation CreateHydrationLog(
+    $input: CreateHydrationLogInput!
+    $condition: ModelHydrationLogConditionInput
+  ) {
+    createHydrationLog(input: $input, condition: $condition) {
+      id
+      userId
+      amount
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const updateHydrationLog = /* GraphQL */ `
+  mutation UpdateHydrationLog(
+    $input: UpdateHydrationLogInput!
+    $condition: ModelHydrationLogConditionInput
+  ) {
+    updateHydrationLog(input: $input, condition: $condition) {
+      id
+      userId
+      amount
+      createdAt
+      updatedAt
+    }
+  }
+`;
