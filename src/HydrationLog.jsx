@@ -1,49 +1,65 @@
 import React, { useState, useEffect } from "react";
-import { startOfDay, endOfDay, format } from "date-fns";
+import { generateClient } from "@aws-amplify/api";
+import { graphqlOperation } from "@aws-amplify/api-graphql";
+import { createHydrationLog } from "./graphql/mutations";
+import { listHydrationLogs } from "./graphql/queries";
+import { format } from "date-fns";
 
-const HydrationLog = () => {
+// Initialize AWS Amplify API Client
+const client = generateClient();
+
+const HydrationLog = ({ user }) => {
   const [hydrationLogs, setHydrationLogs] = useState([]);
   const [hydrationInput, setHydrationInput] = useState("");
   const [dailyTotal, setDailyTotal] = useState(0);
   const [error, setError] = useState("");
 
-  // Fetch hydration logs from local storage
-  const fetchHydrationLogs = () => {
-    const storedLogs = JSON.parse(localStorage.getItem("hydrationLogs")) || [];
-    const today = new Date();
-    const startDate = startOfDay(today).toISOString();
-    const endDate = endOfDay(today).toISOString();
+  // Fetch hydration logs from DynamoDB
+  const fetchHydrationLogs = async () => {
+    try {
+      const response = await client.graphql(
+        graphqlOperation(listHydrationLogs, {
+          filter: { userId: { eq: user.username } },
+        })
+      );
+      const logs = response.data.listHydrationLogs.items;
+      setHydrationLogs(logs);
 
-    const dailyLogs = storedLogs.filter(
-      (log) => log.createdAt >= startDate && log.createdAt <= endDate
-    );
-
-    setHydrationLogs(dailyLogs);
-    setDailyTotal(dailyLogs.reduce((sum, log) => sum + log.amount, 0));
+      // Calculate daily total
+      const total = logs.reduce((sum, log) => sum + log.amount, 0);
+      setDailyTotal(total);
+    } catch (err) {
+      console.error("Error fetching hydration logs:", err);
+    }
   };
 
   useEffect(() => {
     fetchHydrationLogs();
   }, []);
 
-  const handleAddHydration = () => {
-    const amount = parseInt(hydrationInput, 10);
-    if (!amount || amount <= 0) {
+  const handleAddHydration = async () => {
+    if (!hydrationInput || isNaN(hydrationInput)) {
       setError("Please enter a valid amount.");
       return;
     }
     setError("");
 
     const newLog = {
-      id: Date.now(),
-      amount,
+      userId: user.username,
+      amount: parseInt(hydrationInput, 10),
       createdAt: new Date().toISOString(),
     };
-    const updatedLogs = [...hydrationLogs, newLog];
-    localStorage.setItem("hydrationLogs", JSON.stringify(updatedLogs));
 
-    setHydrationInput("");
-    fetchHydrationLogs();
+    try {
+      await client.graphql(
+        graphqlOperation(createHydrationLog, { input: newLog })
+      );
+
+      setHydrationInput("");
+      fetchHydrationLogs(); // Refresh data
+    } catch (err) {
+      console.error("Error adding hydration log:", err);
+    }
   };
 
   return (

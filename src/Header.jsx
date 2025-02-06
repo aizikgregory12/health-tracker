@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 
-const Header = ({ selectedForm, setSelectedForm }) => {
+const Header = ({ selectedForm, setSelectedForm, signOut }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -20,7 +20,7 @@ const Header = ({ selectedForm, setSelectedForm }) => {
 
   return (
     <div className="w-full bg-white shadow-md p-4 flex items-center justify-between">
-      {/* Mobile Menu Toggle */}
+      {/* Mobile Menu Button */}
       <button
         onClick={() => setMenuOpen(!menuOpen)}
         className="lg:hidden p-2 rounded-md hover:bg-gray-200"
@@ -82,7 +82,22 @@ const Header = ({ selectedForm, setSelectedForm }) => {
         >
           Hydration Log
         </button>
+        {/* Mobile Logout Button */}
+        <button
+          onClick={signOut}
+          className="w-full lg:hidden bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition whitespace-nowrap flex justify-center"
+        >
+          Log Out
+        </button>
       </div>
+
+      {/* Desktop Logout Button */}
+      <button
+        onClick={signOut}
+        className="hidden lg:block bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition ml-auto"
+      >
+        Log Out
+      </button>
     </div>
   );
 };

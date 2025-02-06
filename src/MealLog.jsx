@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from "react";
+import { generateClient } from "@aws-amplify/api";
+import { graphqlOperation } from "@aws-amplify/api-graphql";
+import { createMealLog } from "./graphql/mutations";
+import { listMealLogs } from "./graphql/queries";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
 
-const MealLog = () => {
+// Initialize AWS Amplify API Client
+const client = generateClient();
+
+const MealLog = ({ user }) => {
   const [meal, setMeal] = useState({
     name: "",
     portionSize: "",
@@ -21,16 +28,28 @@ const MealLog = () => {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const storedMeals = JSON.parse(localStorage.getItem("meals")) || [];
-    setMeals(storedMeals);
+    fetchMealLogs();
   }, []);
+
+  const fetchMealLogs = async () => {
+    try {
+      const response = await client.graphql(
+        graphqlOperation(listMealLogs, {
+          filter: { userId: { eq: user.username } },
+        })
+      );
+      setMeals(response.data.listMealLogs.items);
+    } catch (err) {
+      console.error("Error fetching meal logs:", err);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setMeal((prevMeal) => ({ ...prevMeal, [name]: value }));
   };
 
-  const addMeal = () => {
+  const addMeal = async () => {
     if (
       !meal.name ||
       !meal.portionSize ||
@@ -45,28 +64,35 @@ const MealLog = () => {
     setError("");
 
     const newMeal = {
-      ...meal,
-      id: Date.now(),
+      userId: user.username,
+      name: meal.name,
+      portionSize: parseInt(meal.portionSize, 10),
       calories: parseInt(meal.calories, 10),
       protein: parseInt(meal.protein, 10),
       carbs: parseInt(meal.carbs, 10),
       fats: parseInt(meal.fats, 10),
+      date: meal.date,
+      time: meal.time,
     };
 
-    const updatedMeals = [...meals, newMeal];
-    localStorage.setItem("meals", JSON.stringify(updatedMeals));
-    setMeals(updatedMeals);
+    try {
+      await client.graphql(graphqlOperation(createMealLog, { input: newMeal }));
 
-    setMeal({
-      name: "",
-      portionSize: "",
-      calories: "",
-      protein: "",
-      carbs: "",
-      fats: "",
-      date: new Date().toISOString().slice(0, 10),
-      time: "12:00",
-    });
+      setMeal({
+        name: "",
+        portionSize: "",
+        calories: "",
+        protein: "",
+        carbs: "",
+        fats: "",
+        date: new Date().toISOString().slice(0, 10),
+        time: "12:00",
+      });
+
+      fetchMealLogs();
+    } catch (err) {
+      console.error("Error adding meal log:", err);
+    }
   };
 
   const getMealsForSelectedDate = () => {
@@ -202,22 +228,7 @@ const MealLog = () => {
             className="w-full"
           />
 
-          <div className="mt-6">
-            <label className="block text-center font-semibold text-blue-500 mb-2">
-              View Summary
-            </label>
-            <select
-              value={summaryType}
-              onChange={(e) => setSummaryType(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-            >
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-            </select>
-          </div>
-
-          <div className="mt-4 p-4 border border-gray-300 rounded-lg bg-gray-50 shadow-sm">
+          <div className="mt-6 p-4 border border-gray-300 rounded-lg bg-gray-50 shadow-sm">
             <h4 className="text-center font-semibold text-blue-600 mb-4">
               {summaryType.charAt(0).toUpperCase() + summaryType.slice(1)}{" "}
               Summary

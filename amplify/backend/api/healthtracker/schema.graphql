@@ -1,0 +1,40 @@
+type HydrationLog
+  @model
+  @auth(
+    rules: [{ allow: owner }, { allow: private, operations: [read, create] }]
+  ) {
+  id: ID!
+  userId: ID!
+  amount: Int!
+  createdAt: AWSDateTime!
+}
+
+type ExerciseLog
+  @model
+  @auth(
+    rules: [{ allow: owner }, { allow: private, operations: [read, create] }]
+  ) {
+  id: ID!
+  userId: ID!
+  name: String!
+  duration: Int!
+  intensity: String!
+  caloriesBurned: Int!
+  date: AWSDate!
+}
+
+type MealLog
+  @model
+  @auth(
+    rules: [{ allow: owner }, { allow: private, operations: [read, create] }]
+  ) {
+  id: ID!
+  userId: ID!
+  name: String!
+  portionSize: Int!
+  calories: Int!
+  protein: Int!
+  carbs: Int!
+  fats: Int!
+  date: AWSDate!
+}

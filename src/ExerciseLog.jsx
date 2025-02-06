@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from "react";
+import { generateClient } from "@aws-amplify/api";
+import { graphqlOperation } from "@aws-amplify/api-graphql";
+import { createExerciseLog } from "./graphql/mutations";
+import { listExerciseLogs } from "./graphql/queries";
 import { Line } from "react-chartjs-2";
 import { startOfWeek, endOfWeek } from "date-fns";
 import {
@@ -22,7 +26,10 @@ ChartJS.register(
   Legend
 );
 
-const ExerciseLog = () => {
+// Initialize AWS Amplify API Client
+const client = generateClient();
+
+const ExerciseLog = ({ user }) => {
   const [exercise, setExercise] = useState({
     name: "",
     duration: "",
@@ -36,24 +43,29 @@ const ExerciseLog = () => {
   const [goalInput, setGoalInput] = useState({ calories: "", duration: "" });
   const [error, setError] = useState("");
 
-  // Fetch data from local storage
   useEffect(() => {
-    const storedExercises = JSON.parse(localStorage.getItem("exercises")) || [];
-    setExercises(storedExercises);
-
-    const storedGoals = JSON.parse(localStorage.getItem("weeklyGoal")) || {
-      calories: 0,
-      duration: 0,
-    };
-    setWeeklyGoal(storedGoals);
+    fetchExerciseLogs();
   }, []);
+
+  const fetchExerciseLogs = async () => {
+    try {
+      const response = await client.graphql(
+        graphqlOperation(listExerciseLogs, {
+          filter: { userId: { eq: user.username } },
+        })
+      );
+      setExercises(response.data.listExerciseLogs.items);
+    } catch (err) {
+      console.error("Error fetching exercise logs:", err);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setExercise((prev) => ({ ...prev, [name]: value }));
   };
 
-  const addExercise = () => {
+  const addExercise = async () => {
     if (
       !exercise.name ||
       !exercise.duration ||
@@ -67,33 +79,38 @@ const ExerciseLog = () => {
     setError("");
 
     const newExercise = {
-      ...exercise,
-      id: Date.now(),
+      userId: user.username,
+      name: exercise.name,
       duration: parseInt(exercise.duration),
+      intensity: exercise.intensity,
       caloriesBurned: parseInt(exercise.caloriesBurned),
+      date: exercise.date,
     };
-    const updatedExercises = [...exercises, newExercise];
 
-    localStorage.setItem("exercises", JSON.stringify(updatedExercises));
-    setExercises(updatedExercises);
+    try {
+      await client.graphql(
+        graphqlOperation(createExerciseLog, { input: newExercise })
+      );
 
-    setExercise({
-      name: "",
-      duration: "",
-      intensity: "",
-      caloriesBurned: "",
-      date: new Date().toISOString().slice(0, 10),
-    });
+      setExercise({
+        name: "",
+        duration: "",
+        intensity: "",
+        caloriesBurned: "",
+        date: new Date().toISOString().slice(0, 10),
+      });
+
+      fetchExerciseLogs();
+    } catch (err) {
+      console.error("Error adding exercise log:", err);
+    }
   };
 
   const saveWeeklyGoal = () => {
-    const newGoal = {
+    setWeeklyGoal({
       calories: parseInt(goalInput.calories) || 0,
       duration: parseInt(goalInput.duration) || 0,
-    };
-
-    localStorage.setItem("weeklyGoal", JSON.stringify(newGoal));
-    setWeeklyGoal(newGoal);
+    });
     setGoalInput({ calories: "", duration: "" });
   };
 
@@ -203,7 +220,6 @@ const ExerciseLog = () => {
             Add Exercise
           </button>
         </div>
-
         <div className="md:w-1/3 min-w-[300px] space-y-4">
           <h3 className="text-lg font-semibold text-blue-500 text-center">
             Weekly Goals
